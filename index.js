@@ -1,12 +1,18 @@
 const axios = require("axios");
 
 const SYMBOL = "BTCUSDT";
-const BUY_PRICE = 34000;
-const SELL_PRICE = 34120;
+const BUY_PRICE = 105248;
+const SELL_PRICE = 105261;
 
 const API_URL = "https://testnet.binance.vision"; //https://api.binance.com
 
 let isOpened = false;
+
+function calcSMA(data) {
+    const closes = data.map(candle => parseFloat(candle[4]));
+    const sum = closes.reduce((a,b) => a + b);
+    return sum / data.length;
+}
 
 async function start() {
     
@@ -17,12 +23,16 @@ async function start() {
     console.clear();
     console.log("Price: " + price);
 
-    if(price <= BUY_PRICE && isOpened == false) {
+    const sma = calcSMA(data);
+    console.log("SMA: " + sma);
+    console.log("Is Opened? " + isOpened);
+
+    if(price <= (sma * 0.9) && isOpened === false) {
         console.log("Comprar");
         isOpened = true;
     }
 
-    else if(price >= SELL_PRICE && isOpened == true) {
+    else if (price >= (sma * 1.1) && isOpened === true) {
         console.log("Vender");
         isOpened = false;
     }
